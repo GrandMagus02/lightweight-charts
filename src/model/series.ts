@@ -5,7 +5,7 @@ import { VolumeFormatter } from '../formatters/volume-formatter';
 
 import { ensureDefined, ensureNotNull } from '../helpers/assertions';
 import { IDestroyable } from '../helpers/idestroyable';
-import { isInteger, merge } from '../helpers/strict-type-checks';
+import { DeepPartial, isInteger, merge } from '../helpers/strict-type-checks';
 
 import { SeriesAreaPaneView } from '../views/pane/area-pane-view';
 import { SeriesBarsPaneView } from '../views/pane/bars-pane-view';
@@ -49,7 +49,7 @@ import {
 	AreaStyleOptions,
 	BaselineStyleOptions,
 	HistogramStyleOptions,
-	LineStyleOptions,
+	LineStyleOptions, SeriesOptionsCommon,
 	SeriesOptionsMap,
 	SeriesPartialOptionsMap,
 	SeriesType,
@@ -77,12 +77,12 @@ function extractPrimitivePaneViews(
 function primitivePaneViewsExtractor(wrapper: SeriesPrimitiveWrapper): readonly ISeriesPrimitivePaneViewWrapper[] {
 	return wrapper.paneViews();
 }
-function primitivePricePaneViewsExtractor(wrapper: SeriesPrimitiveWrapper): readonly ISeriesPrimitivePaneViewWrapper[] {
-	return wrapper.priceAxisPaneViews();
-}
-function primitiveTimePaneViewsExtractor(wrapper: SeriesPrimitiveWrapper): readonly ISeriesPrimitivePaneViewWrapper[] {
-	return wrapper.timeAxisPaneViews();
-}
+// function primitivePricePaneViewsExtractor(wrapper: SeriesPrimitiveWrapper): readonly ISeriesPrimitivePaneViewWrapper[] {
+// 	return wrapper.priceAxisPaneViews();
+// }
+// function primitiveTimePaneViewsExtractor(wrapper: SeriesPrimitiveWrapper): readonly ISeriesPrimitivePaneViewWrapper[] {
+// 	return wrapper.timeAxisPaneViews();
+// }
 
 type CustomDataToPlotRowValueConverter<HorzScaleItem> = (item: CustomData<HorzScaleItem> | CustomSeriesWhitespaceData<HorzScaleItem>) => number[];
 
@@ -141,6 +141,7 @@ export interface ISeries<T extends SeriesType> extends IPriceDataSource {
 	barColorer(): ISeriesBarColorer<T>;
 	markerDataAtIndex(index: TimePointIndex): MarkerData | null;
 	dataAt(time: TimePointIndex): SeriesDataAtTypeMap[SeriesType] | null;
+	applyOptions(options: SeriesPartialOptionsInternal<T> | DeepPartial<SeriesOptionsCommon>): void;
 }
 
 export class Series<T extends SeriesType> extends PriceDataSource implements IDestroyable, ISeries<SeriesType> {
@@ -261,12 +262,13 @@ export class Series<T extends SeriesType> extends PriceDataSource implements IDe
 		return this._options as SeriesOptionsMap[T];
 	}
 
-	public applyOptions(options: SeriesPartialOptionsInternal<T>): void {
+	public applyOptions(options: SeriesPartialOptionsInternal<T> | DeepPartial<SeriesOptionsCommon>): void {
 		const targetPriceScaleId = options.priceScaleId;
 		if (targetPriceScaleId !== undefined && targetPriceScaleId !== this._options.priceScaleId) {
 			// series cannot do it itself, ask model
 			this.model().moveSeriesToScale(this, targetPriceScaleId);
 		}
+		const previousPaneIndex = this._options.pane ?? 0;
 		merge(this._options, options);
 
 		if (options.priceFormat !== undefined) {
@@ -277,6 +279,10 @@ export class Series<T extends SeriesType> extends PriceDataSource implements IDe
 			// full update is quite heavy operation in terms of performance
 			// but updating formatter looks like quite rare so forcing a full update here shouldn't affect the performance a lot
 			this.model().fullUpdate();
+		}
+
+		if (options.pane && previousPaneIndex !== options.pane) {
+			this.model().moveSeriesToPane(this, previousPaneIndex, options.pane);
 		}
 
 		this.model().updateSource(this);
@@ -439,13 +445,13 @@ export class Series<T extends SeriesType> extends PriceDataSource implements IDe
 		return this._extractPaneViews(primitivePaneViewsExtractor, 'bottom');
 	}
 
-	public pricePaneViews(zOrder: SeriesPrimitivePaneViewZOrder): readonly IPaneView[] {
-		return this._extractPaneViews(primitivePricePaneViewsExtractor, zOrder);
-	}
+	// public pricePaneViews(zOrder: SeriesPrimitivePaneViewZOrder): readonly IPaneView[] {
+	// 	return this._extractPaneViews(primitivePricePaneViewsExtractor, zOrder);
+	// }
 
-	public timePaneViews(zOrder: SeriesPrimitivePaneViewZOrder): readonly IPaneView[] {
-		return this._extractPaneViews(primitiveTimePaneViewsExtractor, zOrder);
-	}
+	// public timePaneViews(zOrder: SeriesPrimitivePaneViewZOrder): readonly IPaneView[] {
+	// 	return this._extractPaneViews(primitiveTimePaneViewsExtractor, zOrder);
+	// }
 
 	public primitiveHitTest(x: Coordinate, y: Coordinate): PrimitiveHoveredItem[] {
 		return this._primitives

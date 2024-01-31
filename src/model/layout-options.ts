@@ -48,6 +48,13 @@ export interface VerticalGradientColor {
  */
 export type Background = SolidColor | VerticalGradientColor;
 
+export interface PaneOptions {
+	/**
+	 * Height of the pane as fraction of the total height.
+	 */
+	stretchFactor: number;
+}
+
 /** Represents layout options */
 export interface LayoutOptions {
 	/**
@@ -77,4 +84,14 @@ export interface LayoutOptions {
 	 * @defaultValue `-apple-system, BlinkMacSystemFont, 'Trebuchet MS', Roboto, Ubuntu, sans-serif`
 	 */
 	fontFamily: string;
+
+	/**
+	 * Allow to resize panes.
+	 */
+	resizePanes: boolean;
+
+	/**
+	 * Panes options.
+	 */
+	panes: PaneOptions[];
 }

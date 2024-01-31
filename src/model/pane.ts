@@ -21,6 +21,10 @@ interface MinMaxOrderInfo {
 	maxZOrder: number;
 }
 
+export interface PaneInfo {
+	paneIndex?: number;
+}
+
 export class Pane implements IDestroyable {
 	private readonly _timeScale: ITimeScale;
 	private readonly _model: IChartModelBase;
@@ -39,18 +43,24 @@ export class Pane implements IDestroyable {
 	private _leftPriceScale: PriceScale;
 	private _rightPriceScale: PriceScale;
 
-	public constructor(timeScale: ITimeScale, model: IChartModelBase) {
+	public constructor(timeScale: ITimeScale, model: IChartModelBase, initialPaneIndex: number = 0) {
 		this._timeScale = timeScale;
 		this._model = model;
 		this._grid = new Grid(this);
 
 		const options = model.options();
 
-		this._leftPriceScale = this._createPriceScale(DefaultPriceScaleId.Left, options.leftPriceScale);
-		this._rightPriceScale = this._createPriceScale(DefaultPriceScaleId.Right, options.rightPriceScale);
-
+		if (initialPaneIndex === 0) {
+			this._leftPriceScale = this._createPriceScale(DefaultPriceScaleId.Left, options.leftPriceScale);
+			this._rightPriceScale = this._createPriceScale(DefaultPriceScaleId.Right, options.rightPriceScale);
+		} else {
+			this._leftPriceScale = this._createPriceScale(DefaultPriceScaleId.NonPrimary, options.leftPriceScale);
+			this._rightPriceScale = this._createPriceScale(DefaultPriceScaleId.NonPrimary, options.rightPriceScale);
+		}
 		this._leftPriceScale.modeChanged().subscribe(this._onPriceScaleModeChanged.bind(this, this._leftPriceScale), this);
 		this._rightPriceScale.modeChanged().subscribe(this._onPriceScaleModeChanged.bind(this, this._rightPriceScale), this);
+
+		this._stretchFactor = options.layout.panes[initialPaneIndex]?.stretchFactor ?? DEFAULT_STRETCH_FACTOR;
 
 		this.applyScaleOptions(options);
 	}

@@ -62,7 +62,7 @@ export class SeriesCustomPaneView extends SeriesPaneViewBase<
 		model: IChartModelBase,
 		paneView: ICustomSeriesPaneView<unknown>
 	) {
-		super(series, model, false);
+		super(series, model, true);
 		this._paneView = paneView;
 		this._renderer = new CustomSeriesPaneRendererWrapper(
 			this._paneView.renderer(),

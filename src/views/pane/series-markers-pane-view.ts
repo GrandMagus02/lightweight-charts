@@ -22,6 +22,7 @@ import {
 	shapeMargin as calculateShapeMargin,
 } from '../../renderers/series-markers-utils';
 
+import { Pane } from '../../model/pane';
 import { IUpdatablePaneView, UpdateType } from './iupdatable-pane-view';
 
 const enum Constants {
@@ -114,7 +115,7 @@ export class SeriesMarkersPaneView implements IUpdatablePaneView {
 		}
 	}
 
-	public renderer(addAnchors?: boolean): IPaneRenderer | null {
+	public renderer(pane: Pane, addAnchors?: boolean): IPaneRenderer | null {
 		if (!this._series.visible()) {
 			return null;
 		}
