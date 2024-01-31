@@ -24,7 +24,7 @@ import { Pane } from '../model/pane';
 import { TextWidthCache } from '../model/text-width-cache';
 import { IPaneRenderer } from '../renderers/ipane-renderer';
 import { TimeAxisViewRendererOptions } from '../renderers/itime-axis-view-renderer';
-import { IAxisView } from '../views/pane/iaxis-view';
+import { IPaneView } from '../views/pane/ipane-view';
 
 import { createBoundCanvas, releaseCanvas } from './canvas-utils';
 import { ChartWidget } from './chart-widget';
@@ -44,7 +44,7 @@ const enum CursorType {
 }
 
 function buildTimeAxisViewsGetter(zOrder: SeriesPrimitivePaneViewZOrder): ITimeAxisViewsGetter {
-	return (source: IDataSource): readonly IAxisView[] => source.timePaneViews?.(zOrder) ?? [];
+	return (source: IDataSource): readonly IPaneView[] => source.timePaneViews?.(zOrder) ?? [];
 }
 const sourcePaneViews = buildTimeAxisViewsGetter('normal');
 const sourceTopPaneViews = buildTimeAxisViewsGetter('top');

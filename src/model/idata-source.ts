@@ -1,4 +1,3 @@
-import { IAxisView } from '../views/pane/iaxis-view';
 import { IPaneView } from '../views/pane/ipane-view';
 import { IPriceAxisView } from '../views/price-axis/iprice-axis-view';
 import { ITimeAxisView } from '../views/time-axis/itime-axis-view';
@@ -18,8 +17,8 @@ export interface ZOrdered {
  */
 interface IPluginPaneViews {
 	bottomPaneViews?(pane: Pane): readonly IPaneView[];
-	pricePaneViews?(zOrder: SeriesPrimitivePaneViewZOrder): readonly IAxisView[];
-	timePaneViews?(zOrder: SeriesPrimitivePaneViewZOrder): readonly IAxisView[];
+	pricePaneViews?(zOrder: SeriesPrimitivePaneViewZOrder): readonly IPaneView[];
+	timePaneViews?(zOrder: SeriesPrimitivePaneViewZOrder): readonly IPaneView[];
 	primitiveHitTest?(x: Coordinate, y: Coordinate): PrimitiveHoveredItem[];
 }
 

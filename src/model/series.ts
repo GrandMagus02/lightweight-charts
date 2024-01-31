@@ -77,12 +77,12 @@ function extractPrimitivePaneViews(
 function primitivePaneViewsExtractor(wrapper: SeriesPrimitiveWrapper): readonly ISeriesPrimitivePaneViewWrapper[] {
 	return wrapper.paneViews();
 }
-// function primitivePricePaneViewsExtractor(wrapper: SeriesPrimitiveWrapper): readonly ISeriesPrimitivePaneViewWrapper[] {
-// 	return wrapper.priceAxisPaneViews();
-// }
-// function primitiveTimePaneViewsExtractor(wrapper: SeriesPrimitiveWrapper): readonly ISeriesPrimitivePaneViewWrapper[] {
-// 	return wrapper.timeAxisPaneViews();
-// }
+function primitivePricePaneViewsExtractor(wrapper: SeriesPrimitiveWrapper): readonly ISeriesPrimitivePaneViewWrapper[] {
+	return wrapper.priceAxisPaneViews();
+}
+function primitiveTimePaneViewsExtractor(wrapper: SeriesPrimitiveWrapper): readonly ISeriesPrimitivePaneViewWrapper[] {
+	return wrapper.timeAxisPaneViews();
+}
 
 type CustomDataToPlotRowValueConverter<HorzScaleItem> = (item: CustomData<HorzScaleItem> | CustomSeriesWhitespaceData<HorzScaleItem>) => number[];
 
@@ -445,13 +445,13 @@ export class Series<T extends SeriesType> extends PriceDataSource implements IDe
 		return this._extractPaneViews(primitivePaneViewsExtractor, 'bottom');
 	}
 
-	// public pricePaneViews(zOrder: SeriesPrimitivePaneViewZOrder): readonly IPaneView[] {
-	// 	return this._extractPaneViews(primitivePricePaneViewsExtractor, zOrder);
-	// }
+	public pricePaneViews(zOrder: SeriesPrimitivePaneViewZOrder): readonly IPaneView[] {
+		return this._extractPaneViews(primitivePricePaneViewsExtractor, zOrder);
+	}
 
-	// public timePaneViews(zOrder: SeriesPrimitivePaneViewZOrder): readonly IPaneView[] {
-	// 	return this._extractPaneViews(primitiveTimePaneViewsExtractor, zOrder);
-	// }
+	public timePaneViews(zOrder: SeriesPrimitivePaneViewZOrder): readonly IPaneView[] {
+		return this._extractPaneViews(primitiveTimePaneViewsExtractor, zOrder);
+	}
 
 	public primitiveHitTest(x: Coordinate, y: Coordinate): PrimitiveHoveredItem[] {
 		return this._primitives

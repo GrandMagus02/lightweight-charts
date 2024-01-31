@@ -26,7 +26,7 @@ import { PriceMark, PriceScale } from '../model/price-scale';
 import { TextWidthCache } from '../model/text-width-cache';
 import { PriceAxisViewRendererOptions } from '../renderers/iprice-axis-view-renderer';
 import { PriceAxisRendererOptionsProvider } from '../renderers/price-axis-renderer-options-provider';
-import { IAxisView } from '../views/pane/iaxis-view';
+import { IPaneView } from '../views/pane/ipane-view';
 import { IPriceAxisView } from '../views/price-axis/iprice-axis-view';
 
 import { createBoundCanvas, releaseCanvas } from './canvas-utils';
@@ -56,7 +56,7 @@ function buildPriceAxisViewsGetter(
 	zOrder: SeriesPrimitivePaneViewZOrder,
 	priceScaleId: PriceAxisWidgetSide
 ): IPriceAxisViewsGetter {
-	return (source: IDataSource): readonly IAxisView[] => {
+	return (source: IDataSource): readonly IPaneView[] => {
 		const psId = source.priceScale()?.id() ?? '';
 		if (psId !== priceScaleId) {
 			// exclude if source is using a different price scale.

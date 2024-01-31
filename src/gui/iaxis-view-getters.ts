@@ -1,9 +1,9 @@
 import { IDataSource } from '../model/idata-source';
-import { IAxisView } from '../views/pane/iaxis-view';
+import { IPaneView } from '../views/pane/ipane-view';
 
 type IAxisViewsGetter = (
 	source: IDataSource
-) => readonly IAxisView[];
+) => readonly IPaneView[];
 
 export type IPriceAxisViewsGetter = IAxisViewsGetter;
 export type ITimeAxisViewsGetter = IAxisViewsGetter;
