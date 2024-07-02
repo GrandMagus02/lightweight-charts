@@ -18,7 +18,7 @@ debug.html
 
 # artifacts
 /lib/
-/dist/
+#/dist/  # storing dist in git for now
 /src/**/*.js
 /src/**/*.d.ts
 /website/docs/api/
