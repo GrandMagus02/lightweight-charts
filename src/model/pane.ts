@@ -8,6 +8,7 @@ import { ChartOptionsBase, IChartModelBase, OverlayPriceScaleOptions, VisiblePri
 import { DefaultPriceScaleId, isDefaultPriceScale } from './default-price-scale';
 import { Grid } from './grid';
 import { IPriceDataSource } from './iprice-data-source';
+import { PaneOptions } from './layout-options';
 import { PriceScale, PriceScaleOptions, PriceScaleState } from './price-scale';
 import { sortSources } from './sort-sources';
 import { ITimeScale } from './time-scale';
@@ -34,6 +35,7 @@ export class Pane implements IDestroyable {
 	private _overlaySourcesByScaleId: Map<string, IPriceDataSource[]> = new Map();
 
 	private _height: number = 0;
+	private _minHeight: number = 30;
 	private _width: number = 0;
 	private _stretchFactor: number = DEFAULT_STRETCH_FACTOR;
 	private _cachedOrderedSources: readonly IPriceDataSource[] | null = null;
@@ -49,20 +51,23 @@ export class Pane implements IDestroyable {
 		this._grid = new Grid(this);
 
 		const options = model.options();
+		const paneOptions = options.layout.panes[initialPaneIndex] || {};
 
-		if (initialPaneIndex === 0) {
-			this._leftPriceScale = this._createPriceScale(DefaultPriceScaleId.Left, options.leftPriceScale);
-			this._rightPriceScale = this._createPriceScale(DefaultPriceScaleId.Right, options.rightPriceScale);
-		} else {
-			this._leftPriceScale = this._createPriceScale(DefaultPriceScaleId.NonPrimary, options.leftPriceScale);
-			this._rightPriceScale = this._createPriceScale(DefaultPriceScaleId.NonPrimary, options.rightPriceScale);
-		}
+		this._leftPriceScale = this._createPriceScale(DefaultPriceScaleId.Left, options.leftPriceScale);
 		this._leftPriceScale.modeChanged().subscribe(this._onPriceScaleModeChanged.bind(this, this._leftPriceScale), this);
+
+		this._rightPriceScale = this._createPriceScale(DefaultPriceScaleId.Right, options.rightPriceScale);
 		this._rightPriceScale.modeChanged().subscribe(this._onPriceScaleModeChanged.bind(this, this._rightPriceScale), this);
 
 		this._stretchFactor = options.layout.panes[initialPaneIndex]?.stretchFactor ?? DEFAULT_STRETCH_FACTOR;
 
 		this.applyScaleOptions(options);
+		this.applyOptions(paneOptions);
+	}
+
+	public applyOptions(options: DeepPartial<PaneOptions>): void {
+		this._stretchFactor = options.stretchFactor ?? this._stretchFactor;
+		this._minHeight = options.minHeight ?? 30;
 	}
 
 	public applyScaleOptions(options: DeepPartial<ChartOptionsBase>): void {
@@ -135,6 +140,10 @@ export class Pane implements IDestroyable {
 
 	public height(): number {
 		return this._height;
+	}
+
+	public minHeight(): number {
+		return this._minHeight;
 	}
 
 	public setWidth(width: number): void {

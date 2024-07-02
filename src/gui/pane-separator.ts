@@ -137,8 +137,10 @@ export class PaneSeparator implements IDestroyable {
 		this._deltaY = 0;
 		this._totalHeight = this._paneA.getSize().height + this._paneB.getSize().height;
 		this._totalStretch = this._paneA.stretchFactor() + this._paneB.stretchFactor();
-		this._minPaneHeight = 30;
-		this._maxPaneHeight = this._totalHeight - this._minPaneHeight;
+		const minA = this._paneA.state().minHeight();
+		const minB = this._paneB.state().minHeight();
+		this._minPaneHeight = minA;
+		this._maxPaneHeight = this._totalHeight - minB;
 		this._pixelStretchFactor = this._totalStretch / this._totalHeight;
 		this._mouseActive = true;
 		this._handle?.classList.add(this._classNameActive);

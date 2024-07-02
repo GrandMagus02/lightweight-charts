@@ -522,7 +522,13 @@ export class ChartModel<HorzScaleItem> implements IDestroyable, IChartModelBase 
 	public applyOptions(options: DeepPartial<ChartOptionsInternal<HorzScaleItem>>): void {
 		merge(this._options, options);
 
-		this._panes.forEach((p: Pane) => p.applyScaleOptions(options));
+		this._panes.forEach((p: Pane, index: number) => {
+			const paneOptions = options.layout?.panes?.[index];
+			if (paneOptions !== undefined) {
+				p.applyOptions(paneOptions);
+			}
+			p.applyScaleOptions(options);
+		});
 
 		if (options.timeScale !== undefined) {
 			this._timeScale.applyOptions(options.timeScale);
@@ -1121,8 +1127,8 @@ export class ChartModel<HorzScaleItem> implements IDestroyable, IChartModelBase 
 		}
 
 		this._panes.forEach((pane: Pane) => {
-			// pane.grid().paneView().update();
-			pane.updateAllSources();
+			pane.grid().paneView().update();
+			// pane.updateAllSources();
 		});
 	}
 

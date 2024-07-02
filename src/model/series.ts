@@ -470,7 +470,7 @@ export class Series<T extends SeriesType> extends PriceDataSource implements IDe
 	}
 
 	public override priceAxisViews(pane: Pane, priceScale: PriceScale): readonly IPriceAxisView[] {
-		if (priceScale !== this._priceScale && !this._isOverlay()) {
+		if (priceScale.id() !== this._priceScale?.id() && !this._isOverlay()) {
 			return [];
 		}
 		const result = [...this._priceAxisViews];

@@ -18,7 +18,6 @@ import { ChartOptionsInternalBase } from '../model/chart-model';
 import { Coordinate } from '../model/coordinate';
 import { IDataSource } from '../model/idata-source';
 import { InvalidationLevel } from '../model/invalidate-mask';
-import { IPriceDataSource } from '../model/iprice-data-source';
 import { SeriesPrimitivePaneViewZOrder } from '../model/iseries-primitive';
 import { LayoutOptions } from '../model/layout-options';
 import { PriceScalePosition } from '../model/pane';
@@ -522,16 +521,17 @@ export class PriceAxisWidget implements IDestroyable {
 		const paneState = pane.state();
 		const rendererOptions = this.rendererOptions();
 
+		// commented because it breaks label alignment
 		// if we are default price scale, append labels from no-scale
-		const isDefault = this._priceScale === paneState.defaultVisiblePriceScale();
-
-		if (isDefault) {
-			this._pane.state().orderedSources().forEach((source: IPriceDataSource) => {
-				if (paneState.isOverlay(source)) {
-					orderedSources.push(source);
-				}
-			});
-		}
+		// const isDefault = this._priceScale === paneState.defaultVisiblePriceScale();
+		//
+		// if (isDefault) {
+		// 	this._pane.state().orderedSources().forEach((source: IPriceDataSource) => {
+		// 		if (paneState.isOverlay(source)) {
+		// 			orderedSources.push(source);
+		// 		}
+		// 	});
+		// }
 
 		// we can use any, but let's use the first source as "center" one
 		const centerSource = this._priceScale.dataSources()[0];

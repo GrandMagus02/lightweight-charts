@@ -455,24 +455,6 @@ export class ChartWidget<HorzScaleItem> implements IDestroyable, IChartWidgetBas
 		let leftPriceAxisWidth = 0;
 		let rightPriceAxisWidth = 0;
 
-		for (const paneWidget of this._paneWidgets) {
-			if (this._isLeftAxisVisible()) {
-				leftPriceAxisWidth = Math.max(
-					leftPriceAxisWidth,
-					ensureNotNull(paneWidget.leftPriceAxisWidget()).optimalWidth(),
-					this._options.leftPriceScale.minimumWidth
-				);
-			}
-			if (this._isRightAxisVisible()) {
-				rightPriceAxisWidth = Math.max(
-					rightPriceAxisWidth,
-					ensureNotNull(paneWidget.rightPriceAxisWidget()).optimalWidth(),
-					this._options.rightPriceScale.minimumWidth
-				);
-			}
-			totalStretch += paneWidget.stretchFactor();
-		}
-
 		leftPriceAxisWidth = suggestPriceScaleWidth(leftPriceAxisWidth);
 		rightPriceAxisWidth = suggestPriceScaleWidth(rightPriceAxisWidth);
 
@@ -489,6 +471,27 @@ export class ChartWidget<HorzScaleItem> implements IDestroyable, IChartWidgetBas
 
 		const otherWidgetHeight = separatorsHeight + timeAxisHeight;
 		const totalPaneHeight = height < otherWidgetHeight ? 0 : height - otherWidgetHeight;
+
+		for (const paneWidget of this._paneWidgets) {
+			if (this._isLeftAxisVisible()) {
+				leftPriceAxisWidth = Math.max(
+					leftPriceAxisWidth,
+					ensureNotNull(paneWidget.leftPriceAxisWidget()).optimalWidth(),
+					this._options.leftPriceScale.minimumWidth
+				);
+			}
+			if (this._isRightAxisVisible()) {
+				rightPriceAxisWidth = Math.max(
+					rightPriceAxisWidth,
+					ensureNotNull(paneWidget.rightPriceAxisWidget()).optimalWidth(),
+					this._options.rightPriceScale.minimumWidth
+				);
+			}
+			const minHeight = paneWidget.state().minHeight();
+			const minStretchFactor = totalPaneHeight / minHeight;
+			totalStretch += Math.max(paneWidget.stretchFactor(), minStretchFactor);
+		}
+
 		const stretchPixels = totalPaneHeight / totalStretch;
 
 		let accumulatedHeight = 0;

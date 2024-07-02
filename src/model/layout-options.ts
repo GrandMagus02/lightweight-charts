@@ -53,6 +53,16 @@ export interface PaneOptions {
 	 * Height of the pane as fraction of the total height.
 	 */
 	stretchFactor: number;
+	/**
+	 * Minimum height of the pane in pixels.
+	 *
+	 * @defaultValue `30`
+	 */
+	minHeight?: number;
+	/**
+	 * Maximum height of the pane in pixels. Undefined means that there is no maximum.
+	 */
+	maxHeight?: number;
 }
 
 /** Represents layout options */
