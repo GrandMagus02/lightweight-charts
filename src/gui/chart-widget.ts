@@ -71,6 +71,8 @@ export class ChartWidget<HorzScaleItem> implements IDestroyable, IChartWidgetBas
 	private _invalidateMask: InvalidateMask | null = null;
 	private _drawPlanned: boolean = false;
 	private _clicked: Delegate<MouseEventParamsImplSupplier> = new Delegate();
+	private _mouseDown: Delegate<MouseEventParamsImplSupplier> = new Delegate();
+	private _mouseUp: Delegate<MouseEventParamsImplSupplier> = new Delegate();
 	private _dblClicked: Delegate<MouseEventParamsImplSupplier> = new Delegate();
 	private _crosshairMoved: Delegate<MouseEventParamsImplSupplier> = new Delegate();
 	private _onWheelBound: (event: WheelEvent) => void;
@@ -169,6 +171,8 @@ export class ChartWidget<HorzScaleItem> implements IDestroyable, IChartWidgetBas
 			this._tableElement.removeChild(paneWidget.getElement());
 			paneWidget.clicked().unsubscribeAll(this);
 			paneWidget.dblClicked().unsubscribeAll(this);
+			paneWidget.mouseDown().unsubscribeAll(this);
+			paneWidget.mouseUp().unsubscribeAll(this);
 			paneWidget.destroy();
 		}
 		this._paneWidgets = [];
@@ -187,6 +191,8 @@ export class ChartWidget<HorzScaleItem> implements IDestroyable, IChartWidgetBas
 		this._crosshairMoved.destroy();
 		this._clicked.destroy();
 		this._dblClicked.destroy();
+		this._mouseDown.destroy();
+		this._mouseUp.destroy();
 
 		this._uninstallObserver();
 	}
@@ -259,6 +265,14 @@ export class ChartWidget<HorzScaleItem> implements IDestroyable, IChartWidgetBas
 
 	public crosshairMoved(): ISubscription<MouseEventParamsImplSupplier> {
 		return this._crosshairMoved;
+	}
+
+	public mouseDown(): ISubscription<MouseEventParamsImplSupplier> {
+		return this._mouseDown;
+	}
+
+	public mouseUp(): ISubscription<MouseEventParamsImplSupplier> {
+		return this._mouseUp;
 	}
 
 	public takeScreenshot(): HTMLCanvasElement {
@@ -461,8 +475,6 @@ export class ChartWidget<HorzScaleItem> implements IDestroyable, IChartWidgetBas
 		const width = this._width;
 		const height = this._height;
 
-		const paneWidth = Math.max(width - leftPriceAxisWidth - rightPriceAxisWidth, 0);
-
 		const separatorCount = this._paneSeparators.length;
 		const separatorsHeight = SEPARATOR_HEIGHT * separatorCount;
 		const timeAxisVisible = this._options.timeScale.visible;
@@ -493,6 +505,7 @@ export class ChartWidget<HorzScaleItem> implements IDestroyable, IChartWidgetBas
 		}
 
 		const stretchPixels = totalPaneHeight / totalStretch;
+		const paneWidth = Math.max(width - leftPriceAxisWidth - rightPriceAxisWidth, 0);
 
 		let accumulatedHeight = 0;
 		const pixelRatio = document.body.ownerDocument.defaultView?.devicePixelRatio || 1;
@@ -728,6 +741,8 @@ export class ChartWidget<HorzScaleItem> implements IDestroyable, IChartWidgetBas
 			this._tableElement.removeChild(paneWidget.getElement());
 			paneWidget.clicked().unsubscribeAll(this);
 			paneWidget.dblClicked().unsubscribeAll(this);
+			paneWidget.mouseDown().unsubscribeAll(this);
+			paneWidget.mouseUp().unsubscribeAll(this);
 			paneWidget.destroy();
 
 			const paneSeparator = this._paneSeparators.pop();
@@ -741,6 +756,8 @@ export class ChartWidget<HorzScaleItem> implements IDestroyable, IChartWidgetBas
 			const paneWidget = new PaneWidget(this, panes[i]);
 			paneWidget.clicked().subscribe(this._onPaneWidgetClicked.bind(this), this);
 			paneWidget.dblClicked().subscribe(this._onPaneWidgetDblClicked.bind(this), this);
+			paneWidget.mouseDown().subscribe(this._onPaneWidgetMouseDown.bind(this), this);
+			paneWidget.mouseUp().subscribe(this._onPaneWidgetMouseUp.bind(this), this);
 
 			this._paneWidgets.push(paneWidget);
 
@@ -839,6 +856,22 @@ export class ChartWidget<HorzScaleItem> implements IDestroyable, IChartWidgetBas
 		event: TouchMouseEventData | null
 	): void {
 		this._crosshairMoved.fire(() => this._getMouseEventParamsImpl(time, details, event));
+	}
+
+	private _onPaneWidgetMouseDown(
+		time: TimePointIndex | null,
+		details: Point & PaneInfo | null,
+		event: TouchMouseEventData
+	): void {
+		this._mouseDown.fire(() => this._getMouseEventParamsImpl(time, details, event));
+	}
+
+	private _onPaneWidgetMouseUp(
+		time: TimePointIndex | null,
+		details: Point & PaneInfo | null,
+		event: TouchMouseEventData
+	): void {
+		this._mouseUp.fire(() => this._getMouseEventParamsImpl(time, details, event));
 	}
 
 	private _updateTimeAxisVisibility(): void {

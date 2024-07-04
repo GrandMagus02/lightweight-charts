@@ -76,6 +76,8 @@ export class PaneWidget implements IDestroyable, MouseEventHandlers {
 	private _startScrollingPos: StartScrollPosition | null = null;
 	private _isScrolling: boolean = false;
 	private _clicked: Delegate<TimePointIndex | null, Point & PaneInfo, TouchMouseEventData> = new Delegate();
+	private _mouseDown: Delegate<TimePointIndex | null, Point & PaneInfo, TouchMouseEventData> = new Delegate();
+	private _mouseUp: Delegate<TimePointIndex | null, Point & PaneInfo, TouchMouseEventData> = new Delegate();
 	private _dblClicked: Delegate<TimePointIndex | null, Point & PaneInfo, TouchMouseEventData> = new Delegate();
 	private _prevPinchScale: number = 0;
 	private _longTap: boolean = false;
@@ -245,6 +247,7 @@ export class PaneWidget implements IDestroyable, MouseEventHandlers {
 		this._onMouseEvent();
 		this._mouseTouchDownEvent();
 		this._setCrosshairPosition(event.localX, event.localY, event);
+		this._fireMouseDownDelegate(event);
 	}
 
 	public mouseMoveEvent(event: MouseEventHandlerMouseEvent): void {
@@ -295,6 +298,7 @@ export class PaneWidget implements IDestroyable, MouseEventHandlers {
 		this._longTap = false;
 
 		this._endScroll(event);
+		this._fireMouseUpDelegate(event);
 	}
 
 	public tapEvent(event: MouseEventHandlerTouchEvent): void {
@@ -329,6 +333,14 @@ export class PaneWidget implements IDestroyable, MouseEventHandlers {
 
 	public dblClicked(): ISubscription<TimePointIndex | null, Point, TouchMouseEventData> {
 		return this._dblClicked;
+	}
+
+	public mouseDown(): ISubscription<TimePointIndex | null, Point, TouchMouseEventData> {
+		return this._mouseDown;
+	}
+
+	public mouseUp(): ISubscription<TimePointIndex | null, Point, TouchMouseEventData> {
+		return this._mouseUp;
 	}
 
 	public pinchStartEvent(): void {
@@ -524,6 +536,14 @@ export class PaneWidget implements IDestroyable, MouseEventHandlers {
 
 	private _fireClickedDelegate(event: MouseEventHandlerEventBase): void {
 		this._fireMouseClickDelegate(this._clicked, event);
+	}
+
+	private _fireMouseDownDelegate(event: MouseEventHandlerEventBase): void {
+		this._fireMouseClickDelegate(this._mouseDown, event);
+	}
+
+	private _fireMouseUpDelegate(event: MouseEventHandlerEventBase): void {
+		this._fireMouseClickDelegate(this._mouseUp, event);
 	}
 
 	private _fireMouseClickDelegate(delegate: Delegate<TimePointIndex | null, Point & PaneInfo, TouchMouseEventData>, event: MouseEventHandlerEventBase): void {

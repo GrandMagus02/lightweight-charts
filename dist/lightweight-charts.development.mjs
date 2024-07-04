@@ -1,6 +1,6 @@
 /*!
  * @license
- * TradingView Lightweight Charts™ v4.1.7-dev+202407022145
+ * TradingView Lightweight Charts™ v4.1.7-dev+202407031341
  * Copyright (c) 2024 TradingView, Inc.
  * Licensed under Apache License 2.0 https://www.apache.org/licenses/LICENSE-2.0
  */
@@ -10143,6 +10143,8 @@ class PaneWidget {
         this._private__startScrollingPos = null;
         this._private__isScrolling = false;
         this._private__clicked = new Delegate();
+        this._private__mouseDown = new Delegate();
+        this._private__mouseUp = new Delegate();
         this._private__dblClicked = new Delegate();
         this._private__prevPinchScale = 0;
         this._private__longTap = false;
@@ -10286,6 +10288,7 @@ class PaneWidget {
         this._private__onMouseEvent();
         this._private__mouseTouchDownEvent();
         this._private__setCrosshairPosition(event.localX, event.localY, event);
+        this._private__fireMouseDownDelegate(event);
     }
     _internal_mouseMoveEvent(event) {
         var _a;
@@ -10328,6 +10331,7 @@ class PaneWidget {
         this._private__onMouseEvent();
         this._private__longTap = false;
         this._private__endScroll(event);
+        this._private__fireMouseUpDelegate(event);
     }
     _internal_tapEvent(event) {
         if (this._private__state === null) {
@@ -10355,6 +10359,12 @@ class PaneWidget {
     }
     _internal_dblClicked() {
         return this._private__dblClicked;
+    }
+    _internal_mouseDown() {
+        return this._private__mouseDown;
+    }
+    _internal_mouseUp() {
+        return this._private__mouseUp;
     }
     _internal_pinchStartEvent() {
         this._private__prevPinchScale = 1;
@@ -10515,6 +10525,12 @@ class PaneWidget {
     }
     _private__fireClickedDelegate(event) {
         this._private__fireMouseClickDelegate(this._private__clicked, event);
+    }
+    _private__fireMouseDownDelegate(event) {
+        this._private__fireMouseClickDelegate(this._private__mouseDown, event);
+    }
+    _private__fireMouseUpDelegate(event) {
+        this._private__fireMouseClickDelegate(this._private__mouseUp, event);
     }
     _private__fireMouseClickDelegate(delegate, event) {
         const x = event.localX;
@@ -11227,6 +11243,8 @@ class ChartWidget {
         this._private__invalidateMask = null;
         this._private__drawPlanned = false;
         this._private__clicked = new Delegate();
+        this._private__mouseDown = new Delegate();
+        this._private__mouseUp = new Delegate();
         this._private__dblClicked = new Delegate();
         this._private__crosshairMoved = new Delegate();
         this._private__observer = null;
@@ -11298,6 +11316,8 @@ class ChartWidget {
             this._private__tableElement.removeChild(paneWidget._internal_getElement());
             paneWidget._internal_clicked()._internal_unsubscribeAll(this);
             paneWidget._internal_dblClicked()._internal_unsubscribeAll(this);
+            paneWidget._internal_mouseDown()._internal_unsubscribeAll(this);
+            paneWidget._internal_mouseUp()._internal_unsubscribeAll(this);
             paneWidget._internal_destroy();
         }
         this._private__paneWidgets = [];
@@ -11312,6 +11332,8 @@ class ChartWidget {
         this._private__crosshairMoved._internal_destroy();
         this._private__clicked._internal_destroy();
         this._private__dblClicked._internal_destroy();
+        this._private__mouseDown._internal_destroy();
+        this._private__mouseUp._internal_destroy();
         this._private__uninstallObserver();
     }
     _internal_resize(width, height, forceRepaint = false) {
@@ -11366,6 +11388,12 @@ class ChartWidget {
     }
     _internal_crosshairMoved() {
         return this._private__crosshairMoved;
+    }
+    _internal_mouseDown() {
+        return this._private__mouseDown;
+    }
+    _internal_mouseUp() {
+        return this._private__mouseUp;
     }
     _internal_takeScreenshot() {
         if (this._private__invalidateMask !== null) {
@@ -11537,7 +11565,6 @@ class ChartWidget {
         rightPriceAxisWidth = suggestPriceScaleWidth(rightPriceAxisWidth);
         const width = this._private__width;
         const height = this._private__height;
-        const paneWidth = Math.max(width - leftPriceAxisWidth - rightPriceAxisWidth, 0);
         const separatorCount = this._private__paneSeparators.length;
         const separatorsHeight = SEPARATOR_HEIGHT * separatorCount;
         const timeAxisVisible = this._private__options.timeScale.visible;
@@ -11557,6 +11584,7 @@ class ChartWidget {
             totalStretch += Math.max(paneWidget._internal_stretchFactor(), minStretchFactor);
         }
         const stretchPixels = totalPaneHeight / totalStretch;
+        const paneWidth = Math.max(width - leftPriceAxisWidth - rightPriceAxisWidth, 0);
         let accumulatedHeight = 0;
         const pixelRatio = ((_a = document.body.ownerDocument.defaultView) === null || _a === void 0 ? void 0 : _a.devicePixelRatio) || 1;
         for (let paneIndex = 0; paneIndex < this._private__paneWidgets.length; ++paneIndex) {
@@ -11750,6 +11778,8 @@ class ChartWidget {
             this._private__tableElement.removeChild(paneWidget._internal_getElement());
             paneWidget._internal_clicked()._internal_unsubscribeAll(this);
             paneWidget._internal_dblClicked()._internal_unsubscribeAll(this);
+            paneWidget._internal_mouseDown()._internal_unsubscribeAll(this);
+            paneWidget._internal_mouseUp()._internal_unsubscribeAll(this);
             paneWidget._internal_destroy();
             const paneSeparator = this._private__paneSeparators.pop();
             if (paneSeparator !== undefined) {
@@ -11761,6 +11791,8 @@ class ChartWidget {
             const paneWidget = new PaneWidget(this, panes[i]);
             paneWidget._internal_clicked()._internal_subscribe(this._private__onPaneWidgetClicked.bind(this), this);
             paneWidget._internal_dblClicked()._internal_subscribe(this._private__onPaneWidgetDblClicked.bind(this), this);
+            paneWidget._internal_mouseDown()._internal_subscribe(this._private__onPaneWidgetMouseDown.bind(this), this);
+            paneWidget._internal_mouseUp()._internal_subscribe(this._private__onPaneWidgetMouseUp.bind(this), this);
             this._private__paneWidgets.push(paneWidget);
             // create and insert separator
             if (i >= 1) {
@@ -11832,6 +11864,12 @@ class ChartWidget {
     }
     _private__onPaneWidgetCrosshairMoved(time, details, event) {
         this._private__crosshairMoved._internal_fire(() => this._private__getMouseEventParamsImpl(time, details, event));
+    }
+    _private__onPaneWidgetMouseDown(time, details, event) {
+        this._private__mouseDown._internal_fire(() => this._private__getMouseEventParamsImpl(time, details, event));
+    }
+    _private__onPaneWidgetMouseUp(time, details, event) {
+        this._private__mouseUp._internal_fire(() => this._private__getMouseEventParamsImpl(time, details, event));
     }
     _private__updateTimeAxisVisibility() {
         const display = this._private__options.timeScale.visible ? '' : 'none';
@@ -13079,6 +13117,8 @@ class ChartApi {
         this._private__seriesMapReversed = new Map();
         this._private__clickedDelegate = new Delegate();
         this._private__dblClickedDelegate = new Delegate();
+        this._private__mouseDownDelegate = new Delegate();
+        this._private__mouseUpDelegate = new Delegate();
         this._private__crosshairMovedDelegate = new Delegate();
         this._private__dataLayer = new DataLayer(horzScaleBehavior);
         const internalOptions = (options === undefined) ?
@@ -13101,6 +13141,16 @@ class ChartApi {
                 this._private__crosshairMovedDelegate._internal_fire(this._private__convertMouseParams(paramSupplier()));
             }
         }, this);
+        this._private__chartWidget._internal_mouseDown()._internal_subscribe((paramSupplier) => {
+            if (this._private__mouseDownDelegate._internal_hasListeners()) {
+                this._private__mouseDownDelegate._internal_fire(this._private__convertMouseParams(paramSupplier()));
+            }
+        }, this);
+        this._private__chartWidget._internal_mouseUp()._internal_subscribe((paramSupplier) => {
+            if (this._private__mouseUpDelegate._internal_hasListeners()) {
+                this._private__mouseUpDelegate._internal_fire(this._private__convertMouseParams(paramSupplier()));
+            }
+        }, this);
         const model = this._private__chartWidget._internal_model();
         this._private__timeScaleApi = new TimeScaleApi(model, this._private__chartWidget._internal_timeAxisWidget(), this._private__horzScaleBehavior);
     }
@@ -13108,6 +13158,8 @@ class ChartApi {
         this._private__chartWidget._internal_clicked()._internal_unsubscribeAll(this);
         this._private__chartWidget._internal_dblClicked()._internal_unsubscribeAll(this);
         this._private__chartWidget._internal_crosshairMoved()._internal_unsubscribeAll(this);
+        this._private__chartWidget._internal_mouseDown()._internal_unsubscribeAll(this);
+        this._private__chartWidget._internal_mouseUp()._internal_unsubscribeAll(this);
         this._private__timeScaleApi._internal_destroy();
         this._private__chartWidget._internal_destroy();
         this._private__seriesMap.clear();
@@ -13115,6 +13167,8 @@ class ChartApi {
         this._private__clickedDelegate._internal_destroy();
         this._private__dblClickedDelegate._internal_destroy();
         this._private__crosshairMovedDelegate._internal_destroy();
+        this._private__mouseDownDelegate._internal_destroy();
+        this._private__mouseUpDelegate._internal_destroy();
         this._private__dataLayer._internal_destroy();
     }
     resize(width, height, forceRepaint) {
@@ -13182,6 +13236,18 @@ class ChartApi {
     }
     unsubscribeDblClick(handler) {
         this._private__dblClickedDelegate._internal_unsubscribe(handler);
+    }
+    subscribeMouseDown(handler) {
+        this._private__mouseDownDelegate._internal_subscribe(handler);
+    }
+    unsubscribeMouseDown(handler) {
+        this._private__mouseDownDelegate._internal_unsubscribe(handler);
+    }
+    subscribeMouseUp(handler) {
+        this._private__mouseUpDelegate._internal_subscribe(handler);
+    }
+    unsubscribeMouseUp(handler) {
+        this._private__mouseUpDelegate._internal_unsubscribe(handler);
     }
     priceScale(priceScaleId) {
         return new PriceScaleApi(this._private__chartWidget, priceScaleId);
@@ -13337,7 +13403,7 @@ const customSeriesDefaultOptions = Object.assign(Object.assign({}, seriesOptions
  * Returns the current version as a string. For example `'3.3.0'`.
  */
 function version() {
-    return "4.1.7-dev+202407022145";
+    return "4.1.7-dev+202407031341";
 }
 
 export { ColorType, CrosshairMode, LastPriceAnimationMode, LineStyle, LineType, MismatchDirection, PriceLineSource, PriceScaleMode, TickMarkType, TrackingModeExitMode, createChart, createChartEx, customSeriesDefaultOptions, defaultHorzScaleBehavior, isBusinessDay, isUTCTimestamp, version };

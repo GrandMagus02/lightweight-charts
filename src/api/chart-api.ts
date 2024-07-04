@@ -122,6 +122,8 @@ export class ChartApi<HorzScaleItem> implements IChartApiBase<HorzScaleItem>, Da
 
 	private readonly _clickedDelegate: Delegate<MouseEventParams<HorzScaleItem>> = new Delegate();
 	private readonly _dblClickedDelegate: Delegate<MouseEventParams<HorzScaleItem>> = new Delegate();
+	private readonly _mouseDownDelegate: Delegate<MouseEventParams<HorzScaleItem>> = new Delegate();
+	private readonly _mouseUpDelegate: Delegate<MouseEventParams<HorzScaleItem>> = new Delegate();
 	private readonly _crosshairMovedDelegate: Delegate<MouseEventParams<HorzScaleItem>> = new Delegate();
 
 	private readonly _timeScaleApi: TimeScaleApi<HorzScaleItem>;
@@ -161,6 +163,22 @@ export class ChartApi<HorzScaleItem> implements IChartApiBase<HorzScaleItem>, Da
 			},
 			this
 		);
+		this._chartWidget.mouseDown().subscribe(
+			(paramSupplier: MouseEventParamsImplSupplier) => {
+				if (this._mouseDownDelegate.hasListeners()) {
+					this._mouseDownDelegate.fire(this._convertMouseParams(paramSupplier()));
+				}
+			},
+			this
+		);
+		this._chartWidget.mouseUp().subscribe(
+			(paramSupplier: MouseEventParamsImplSupplier) => {
+				if (this._mouseUpDelegate.hasListeners()) {
+					this._mouseUpDelegate.fire(this._convertMouseParams(paramSupplier()));
+				}
+			},
+			this
+		);
 
 		const model = this._chartWidget.model();
 		this._timeScaleApi = new TimeScaleApi(model, this._chartWidget.timeAxisWidget(), this._horzScaleBehavior);
@@ -170,6 +188,8 @@ export class ChartApi<HorzScaleItem> implements IChartApiBase<HorzScaleItem>, Da
 		this._chartWidget.clicked().unsubscribeAll(this);
 		this._chartWidget.dblClicked().unsubscribeAll(this);
 		this._chartWidget.crosshairMoved().unsubscribeAll(this);
+		this._chartWidget.mouseDown().unsubscribeAll(this);
+		this._chartWidget.mouseUp().unsubscribeAll(this);
 
 		this._timeScaleApi.destroy();
 		this._chartWidget.destroy();
@@ -180,6 +200,8 @@ export class ChartApi<HorzScaleItem> implements IChartApiBase<HorzScaleItem>, Da
 		this._clickedDelegate.destroy();
 		this._dblClickedDelegate.destroy();
 		this._crosshairMovedDelegate.destroy();
+		this._mouseDownDelegate.destroy();
+		this._mouseUpDelegate.destroy();
 		this._dataLayer.destroy();
 	}
 
@@ -283,6 +305,22 @@ export class ChartApi<HorzScaleItem> implements IChartApiBase<HorzScaleItem>, Da
 
 	public unsubscribeDblClick(handler: MouseEventHandler<HorzScaleItem>): void {
 		this._dblClickedDelegate.unsubscribe(handler);
+	}
+
+	public subscribeMouseDown(handler: MouseEventHandler<HorzScaleItem>): void {
+		this._mouseDownDelegate.subscribe(handler);
+	}
+
+	public unsubscribeMouseDown(handler: MouseEventHandler<HorzScaleItem>): void {
+		this._mouseDownDelegate.unsubscribe(handler);
+	}
+
+	public subscribeMouseUp(handler: MouseEventHandler<HorzScaleItem>): void {
+		this._mouseUpDelegate.subscribe(handler);
+	}
+
+	public unsubscribeMouseUp(handler: MouseEventHandler<HorzScaleItem>): void {
+		this._mouseUpDelegate.unsubscribe(handler);
 	}
 
 	public priceScale(priceScaleId: string): IPriceScaleApi {
