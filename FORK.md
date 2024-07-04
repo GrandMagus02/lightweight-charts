@@ -6,6 +6,7 @@ This forks implements the following features:
 - [x] Multiple panes support
 - [x] Mouse down/up event types
 - [ ] Multiple price scales support
+- [ ] Add CSS classes to panes and widgets
 
 ## Usage
 
