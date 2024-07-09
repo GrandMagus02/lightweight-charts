@@ -1368,6 +1368,62 @@ export interface IChartApiBase<HorzScaleItem = Time> {
 	 */
 	unsubscribeDblClick(handler: MouseEventHandler<HorzScaleItem>): void;
 	/**
+	 * Subscribe to the mouse down event.
+	 *
+	 * @param handler - Handler to be called on mouse down.
+	 * @example
+	 * ```js
+	 * function myMouseDownHandler(param) {
+	 *     if (!param.point) {
+	 *         return;
+	 *     }
+	 *
+	 *     console.log(`Mouse Down at ${param.point.x}, ${param.point.y}. The time is ${param.time}.`);
+	 * }
+	 *
+	 * chart.subscribeMouseDown(myMouseDownHandler);
+	 * ```
+	 */
+	subscribeMouseDown(handler: MouseEventHandler<HorzScaleItem>): void;
+	/**
+	 * Unsubscribe a handler that was previously subscribed using {@link subscribeMouseDown}.
+	 *
+	 * @param handler - Previously subscribed handler
+	 * @example
+	 * ```js
+	 * chart.unsubscribeMouseDown(myMouseDownHandler);
+	 * ```
+	 */
+	unsubscribeMouseDown(handler: MouseEventHandler<HorzScaleItem>): void;
+	/**
+	 * Subscribe to the mouse up event.
+	 *
+	 * @param handler - Handler to be called on mouse up.
+	 * @example
+	 * ```js
+	 * function myMouseUpHandler(param) {
+	 *     if (!param.point) {
+	 *         return;
+	 *     }
+	 *
+	 *     console.log(`Mouse Up at ${param.point.x}, ${param.point.y}. The time is ${param.time}.`);
+	 * }
+	 *
+	 * chart.subscribeMouseUp(myMouseUpHandler);
+	 * ```
+	 */
+	subscribeMouseUp(handler: MouseEventHandler<HorzScaleItem>): void;
+	/**
+	 * Unsubscribe a handler that was previously subscribed using {@link subscribeMouseUp}.
+	 *
+	 * @param handler - Previously subscribed handler
+	 * @example
+	 * ```js
+	 * chart.unsubscribeMouseUp(myMouseUpHandler);
+	 * ```
+	 */
+	unsubscribeMouseUp(handler: MouseEventHandler<HorzScaleItem>): void;
+	/**
 	 * Subscribe to the crosshair move event.
 	 *
 	 * @param handler - Handler to be called on crosshair move.
