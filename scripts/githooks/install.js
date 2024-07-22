@@ -13,11 +13,15 @@ function fixPath(p) {
 
 function getGitRoot() {
 	let directory = fs.realpathSync(__dirname);
+	console.log(`Starting directory: ${directory}`);
 
 	// eslint-disable-next-line no-constant-condition
 	while (true) {
 		const gitDir = path.join(directory, '.git');
+		console.log(`Checking directory: ${gitDir}`);
+
 		if (fs.existsSync(gitDir) && fs.statSync(gitDir).isDirectory()) {
+			console.log(`Git directory found: ${gitDir}`);
 			return fixPath(directory);
 		}
 
@@ -40,9 +44,9 @@ function getHookScript(pathToFolder) {
 
 # Run all the matching hooks
 if [ -d "${pathToFolder}" ]; then
-	for file in \`ls ${pathToFolder}/*\`; do
-		$file $@ || exit $?
-	done
+    for file in \`ls ${pathToFolder}/*\`; do
+        $file $@ || exit $?
+    done
 fi`;
 }
 
@@ -56,22 +60,26 @@ function main() {
 	console.log(`${magentaColor}Installing githooks...${noColor}`);
 
 	const targetDir = fs.realpathSync(__dirname);
+	console.log(`Target directory: ${targetDir}`);
 	const hooksDir = path.join(gitRoot, '.git', 'hooks');
+	console.log(`Hooks directory: ${hooksDir}`);
+
 	if (!fs.existsSync(hooksDir)) {
 		fs.mkdirSync(hooksDir, { recursive: true });
 	}
-
 	for (const hookName of ['pre-commit']) {
 		const hookEntry = fixPath(path.join(hooksDir, hookName));
+		console.log(`Setting up hook: ${hookEntry}`);
 
 		try {
 			// try to unlink first: avoid writing thru a symlink
 			fs.unlinkSync(hookEntry);
 		} catch (e) {
-			// do nothing
+			console.log(`Error unlinking hook: ${e.message}`);
 		}
 
 		const relativePath = fixPath(path.join(targetDir, hookName));
+		console.log(`Relative path for hook: ${relativePath}`);
 		fs.writeFileSync(hookEntry, getHookScript(relativePath), { encoding: 'utf-8' });
 
 		fs.chmodSync(hookEntry, '0755');
